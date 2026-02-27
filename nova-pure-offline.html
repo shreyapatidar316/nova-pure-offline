@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA — Pure Offline AI Learning</title>
+<!--
+  ✅ 100% OFFLINE — Zero network requests
+  ✅ No CDN, No Google Fonts, No APIs
+  ✅ Open this file → works forever offline
+  ✅ All data saved in browser localStorage
+-->
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0c0c14;
+  --s1:#12121e;
+  --s2:#1c1c2e;
+  --s3:#252538;
+  --bd:#2e2e4a;
+  --ac:#7c6af7;
+  --ac2:#f7a26a;
+  --ac3:#6af7c8;
+  --tx:#e8e8f4;
+  --mt:#6b6b90;
+  --rd:#f76a7c;
+}
+
+body{
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--tx);
+  height:100vh;display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* BG EFFECT */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%,rgba(124,106,247,.08) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 90%,rgba(106,247,200,.06) 0%,transparent 50%);
+}
+
+/* ───────── HEADER ───────── */
+header{
+  position:relative;z-index:10;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;
+  background:rgba(18,18,30,.97);
+  border-bottom:1px solid var(--bd);
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;font-size:18px;
+  background:linear-gradient(135deg,var(--ac),var(--ac3));
+  display:flex;align-items:center;justify-content:center;
+  animation:glow 3s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{box-shadow:0 0 0 0 rgba(124,106,247,.3)}
+  50%{box-shadow:0 0 20px 4px rgba(124,106,247,.4)}
+}
+.logo-name{font-size:20px;font-weight:800;letter-spacing:3px}
+.logo-sub{font-size:9px;color:var(--mt);letter-spacing:2px;margin-top:1px;font-family:monospace}
+.offline-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;
+  background:rgba(106,247,200,.08);
+  border:1px solid rgba(106,247,200,.2);
+  font-size:11px;font-family:monospace;color:var(--ac3);
+}
+.offline-badge::before{
+  content:'';width:7px;height:7px;border-radius:50%;
+  background:var(--ac3);display:block;
+}
+
+/* ───────── LAYOUT ───────── */
+.app{display:flex;flex:1;overflow:hidden;position:relative;z-index:1}
+
+/* ───────── SIDEBAR ───────── */
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sb-block{padding:14px;border-bottom:1px solid var(--bd)}
+.sb-lbl{
+  font-size:9px;letter-spacing:2px;color:var(--mt);
+  text-transform:uppercase;font-family:monospace;margin-bottom:8px;
+}
+.subj-list{display:flex;flex-direction:column;gap:3px}
+.subj-btn{
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:8px 10px;border-radius:8px;
+  border:1px solid transparent;background:transparent;
+  color:var(--mt);font-size:13px;font-weight:600;
+  cursor:pointer;text-align:left;transition:all .15s;
+  font-family:inherit;
+}
+.subj-btn:hover{background:var(--s2);color:var(--tx)}
+.subj-btn.on{
+  background:rgba(124,106,247,.12);color:var(--ac);
+  border-color:rgba(124,106,247,.25);
+}
+.s-ico{font-size:15px;width:20px;text-align:center}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat{
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:8px;padding:9px;text-align:center;
+}
+.stat-n{font-size:17px;font-weight:800;color:var(--ac)}
+.stat-l{font-size:9px;color:var(--mt);font-family:monospace}
+
+/* topics */
+.sb-lbl2{
+  padding:10px 14px 4px;
+  font-size:9px;letter-spacing:2px;color:var(--mt);
+  text-transform:uppercase;font-family:monospace;
+}
+.topics{
+  flex:1;overflow-y:auto;padding:4px 14px 14px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.t-item{
+  padding:6px 9px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:6px;font-size:11px;color:var(--mt);font-family:monospace;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ───────── CONTENT ───────── */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* tabs */
+.tabs{
+  display:flex;border-bottom:1px solid var(--bd);
+  background:var(--s1);flex-shrink:0;
+}
+.tab-btn{
+  padding:12px 18px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;background:none;
+  color:var(--mt);border-bottom:2px solid transparent;
+  font-family:inherit;transition:all .15s;
+}
+.tab-btn:hover{color:var(--tx)}
+.tab-btn.on{color:var(--ac);border-bottom-color:var(--ac)}
+
+/* panels */
+.panel{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.panel.on{display:flex}
+
+/* ───────── CHAT ───────── */
+.msgs{
+  flex:1;overflow-y:auto;padding:20px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.msg{display:flex;gap:10px;animation:up .25s ease}
+.msg.u{flex-direction:row-reverse}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.av{
+  width:30px;height:30px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.av.ai{background:linear-gradient(135deg,var(--ac),var(--ac3))}
+.av.u{background:linear-gradient(135deg,var(--ac2),var(--rd))}
+.bbl{
+  max-width:78%;padding:11px 14px;border-radius:12px;
+  font-size:13.5px;line-height:1.65;
+}
+.msg.ai .bbl{
+  background:var(--s2);border:1px solid var(--bd);
+  border-top-left-radius:2px;
+}
+.msg.u .bbl{
+  background:rgba(124,106,247,.12);border:1px solid rgba(124,106,247,.25);
+  border-top-right-radius:2px;
+}
+.bbl-time{font-size:9px;color:var(--mt);margin-top:3px;font-family:monospace}
+.bbl-acts{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.act-btn{
+  padding:3px 9px;border-radius:4px;border:1px solid var(--bd);
+  background:var(--s1);color:var(--mt);font-size:11px;
+  cursor:pointer;font-family:monospace;transition:all .15s;
+}
+.act-btn:hover{border-color:var(--ac3);color:var(--ac3)}
+
+/* markdown */
+.bbl strong{color:var(--ac2);font-weight:700}
+.bbl em{color:var(--ac3);font-style:italic}
+.bbl code{
+  font-family:monospace;font-size:12px;color:var(--ac3);
+  background:rgba(106,247,200,.08);padding:1px 5px;border-radius:3px;
+}
+.bbl pre{
+  background:#090912;border:1px solid var(--bd);border-radius:8px;
+  padding:12px;overflow-x:auto;margin:8px 0;
+  font-family:monospace;font-size:12px;line-height:1.6;color:#c8d3f5;
+  white-space:pre;
+}
+
+/* typing */
+.typing-row{display:flex;gap:10px}
+.typing-dots{display:flex;align-items:center;gap:4px;padding:14px}
+.typing-dots span{
+  width:6px;height:6px;border-radius:50%;background:var(--ac);
+  display:inline-block;animation:dot 1.1s infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+
+/* input */
+.inp-area{
+  padding:14px 20px;border-top:1px solid var(--bd);
+  background:var(--s1);flex-shrink:0;
+}
+.quick{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.q-btn{
+  padding:4px 11px;border-radius:20px;border:1px solid var(--bd);
+  background:var(--s2);color:var(--mt);font-size:11px;
+  cursor:pointer;font-family:monospace;transition:all .15s;
+}
+.q-btn:hover{border-color:var(--ac);color:var(--ac)}
+.inp-row{display:flex;gap:8px;align-items:flex-end}
+#inp{
+  flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:10px 14px;color:var(--tx);font-family:inherit;font-size:13px;
+  resize:none;outline:none;min-height:44px;max-height:110px;
+  transition:border-color .2s;
+}
+#inp:focus{border-color:var(--ac)}
+#inp::placeholder{color:var(--mt)}
+.send-btn{
+  width:44px;height:44px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--ac),#9b8ef7);
+  border:none;border-radius:10px;cursor:pointer;
+  font-size:17px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.send-btn:hover{transform:scale(1.07);box-shadow:0 0 18px rgba(124,106,247,.4)}
+.send-btn:active{transform:scale(.96)}
+
+/* ───────── QUIZ ───────── */
+#quizP{padding:22px}
+.p-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.p-sub{font-size:12px;color:var(--mt);font-family:monospace;margin-bottom:18px}
+.card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:14px;
+  padding:22px;margin-bottom:14px;animation:up .25s ease;
+}
+.q-txt{font-size:15px;font-weight:700;margin-bottom:14px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{
+  padding:11px 14px;border:1px solid var(--bd);border-radius:8px;
+  cursor:pointer;transition:all .15s;font-size:13px;background:var(--s1);
+}
+.opt:hover:not(.lk){border-color:var(--ac);color:var(--ac);background:rgba(124,106,247,.05)}
+.opt.ok{border-color:var(--ac3);background:rgba(106,247,200,.08);color:var(--ac3)}
+.opt.no{border-color:var(--rd);background:rgba(247,106,124,.08);color:var(--rd)}
+.opt.lk{pointer-events:none}
+.exp{
+  margin-top:14px;padding:11px 14px;
+  background:rgba(124,106,247,.06);border:1px solid rgba(124,106,247,.2);
+  border-radius:8px;font-size:12.5px;color:var(--mt);display:none;
+}
+.nxt-btn{
+  margin-top:14px;padding:9px 22px;
+  background:var(--ac);color:#fff;border:none;border-radius:8px;
+  cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;
+  display:none;transition:background .2s;
+}
+.nxt-btn:hover{background:#9b8ef7}
+.score-box{text-align:center;padding:36px;display:none}
+.sc-em{font-size:52px;margin-bottom:10px}
+.sc-num{font-size:28px;font-weight:800}
+.sc-msg{font-size:13px;color:var(--mt);margin:8px 0 20px}
+
+/* ───────── NOTES ───────── */
+#notesP{padding:22px;gap:12px}
+.row{display:flex;gap:8px}
+.btn{
+  padding:8px 16px;border-radius:8px;border:none;
+  cursor:pointer;font-weight:700;font-size:13px;
+  font-family:inherit;transition:all .2s;
+}
+.btn.p{background:var(--ac);color:#fff}
+.btn.s{background:var(--s2);color:var(--mt);border:1px solid var(--bd)}
+.btn:hover{opacity:.85}
+#notepad{
+  flex:1;min-height:200px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:12px;padding:14px;color:var(--tx);font-size:13px;
+  font-family:monospace;line-height:1.7;resize:none;outline:none;
+}
+#notepad:focus{border-color:var(--ac)}
+.nlist-title{
+  font-size:11px;font-weight:700;color:var(--mt);
+  font-family:monospace;letter-spacing:1px;
+}
+.note-list{display:flex;flex-direction:column;gap:6px}
+.n-item{
+  background:var(--s2);border:1px solid var(--bd);border-radius:8px;
+  padding:11px 13px;font-size:12px;font-family:monospace;
+  cursor:pointer;transition:border-color .15s;
+}
+.n-item:hover{border-color:var(--ac)}
+.n-date{font-size:10px;color:var(--mt);margin-bottom:4px}
+
+/* ───────── PROGRESS ───────── */
+#progP{padding:22px;gap:16px}
+.pb-wrap{margin-bottom:12px}
+.pb-lbl{
+  display:flex;justify-content:space-between;
+  font-size:11px;margin-bottom:5px;color:var(--mt);font-family:monospace;
+}
+.pb{height:7px;background:var(--bd);border-radius:4px;overflow:hidden}
+.pf{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--ac),var(--ac3));transition:width 1.2s ease}
+.achs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}
+.ach{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:12px;display:flex;align-items:center;gap:10px;opacity:.25;transition:all .3s;
+}
+.ach.unlocked{opacity:1;border-color:rgba(247,162,106,.35)}
+.ach-ico{font-size:22px}
+.ach-name{font-size:12px;font-weight:700}
+.ach-desc{font-size:10px;color:var(--mt);font-family:monospace}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <div class="logo-name">NOVA</div>
+      <div class="logo-sub">OFFLINE AI TUTOR</div>
+    </div>
+  </div>
+  <div class="offline-badge">100% OFFLINE · NO INTERNET</div>
+</header>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-block">
+      <div class="sb-lbl">Subject</div>
+      <div class="subj-list" id="subjList"></div>
+    </div>
+    <div class="sb-block">
+      <div class="sb-lbl">Stats</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="sChats">0</div><div class="stat-l">CHATS</div></div>
+        <div class="stat"><div class="stat-n" id="sAvg">—</div><div class="stat-l">QUIZ AVG</div></div>
+        <div class="stat"><div class="stat-n" id="sTopics">0</div><div class="stat-l">TOPICS</div></div>
+        <div class="stat"><div class="stat-n" id="sStreak">🔥0</div><div class="stat-l">STREAK</div></div>
+      </div>
+    </div>
+    <div class="sb-lbl2">Recent Topics</div>
+    <div class="topics" id="topicList">
+      <div class="t-item" style="opacity:.35">No topics yet...</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="tabs">
+      <button class="tab-btn on" onclick="switchTab('chat',this)">💬 Chat</button>
+      <button class="tab-btn" onclick="switchTab('quiz',this)">🎯 Quiz</button>
+      <button class="tab-btn" onclick="switchTab('notes',this)">📝 Notes</button>
+      <button class="tab-btn" onclick="switchTab('prog',this)">📊 Progress</button>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div id="chatP" class="panel on">
+      <div class="msgs" id="msgs"></div>
+      <div class="inp-area">
+        <div class="quick">
+          <button class="q-btn" onclick="qk('Explain this topic simply')">📖 Explain</button>
+          <button class="q-btn" onclick="qk('Give me a real example')">💡 Example</button>
+          <button class="q-btn" onclick="qk('Quiz me on this subject')">🎯 Quiz me</button>
+          <button class="q-btn" onclick="qk('What should I learn next?')">🗺️ Next</button>
+          <button class="q-btn" onclick="qk('Summarize what we covered')">📋 Summary</button>
+        </div>
+        <div class="inp-row">
+          <textarea id="inp" rows="1" placeholder="Ask NOVA anything — works offline!"
+            onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+          <button class="send-btn" onclick="sendMsg()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ PANEL -->
+    <div id="quizP" class="panel">
+      <div class="p-title">🎯 Knowledge Quiz</div>
+      <div class="p-sub" id="qMeta">Pick a subject → Start quiz</div>
+      <div id="qContent">
+        <div class="card" style="text-align:center;padding:44px 22px">
+          <div style="font-size:52px;margin-bottom:14px">🎯</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px">Test Your Knowledge</div>
+          <div style="color:var(--mt);font-size:13px;margin-bottom:24px">5 questions per subject, instant feedback, no internet needed.</div>
+          <button class="nxt-btn" style="display:inline-block" onclick="startQuiz()">Start Quiz →</button>
+        </div>
+      </div>
+      <div class="card score-box" id="scoreBox">
+        <div class="sc-em" id="scEm">🎉</div>
+        <div class="sc-num" id="scNum">0/5</div>
+        <div class="sc-msg" id="scMsg"></div>
+        <button class="nxt-btn" style="display:inline-block" onclick="startQuiz()">Try Again →</button>
+      </div>
+    </div>
+
+    <!-- NOTES PANEL -->
+    <div id="notesP" class="panel">
+      <div>
+        <div class="p-title">📝 Study Notes</div>
+        <div class="p-sub">Saved in your browser — 100% offline</div>
+      </div>
+      <div class="row">
+        <button class="btn p" onclick="saveNote()">💾 Save</button>
+        <button class="btn s" onclick="clearPad()">🗑 Clear</button>
+      </div>
+      <textarea id="notepad" placeholder="Type your notes here...&#10;&#10;• Key concepts&#10;• Formulas  &#10;• Things to remember"></textarea>
+      <div class="nlist-title">SAVED NOTES</div>
+      <div class="note-list" id="noteList"></div>
+    </div>
+
+    <!-- PROGRESS PANEL -->
+    <div id="progP" class="panel">
+      <div>
+        <div class="p-title">📊 Your Progress</div>
+        <div class="p-sub">All tracked locally, no account needed</div>
+      </div>
+      <div class="card">
+        <div class="sb-lbl" style="margin-bottom:14px">SUBJECT COVERAGE</div>
+        <div id="pbars"></div>
+      </div>
+      <div class="card">
+        <div class="sb-lbl" style="margin-bottom:14px">ACHIEVEMENTS</div>
+        <div class="achs">
+          <div class="ach" id="a-first"><div class="ach-ico">🌱</div><div><div class="ach-name">First Steps</div><div class="ach-desc">Send first message</div></div></div>
+          <div class="ach" id="a-quiz3"><div class="ach-ico">🎯</div><div><div class="ach-name">Quiz Taker</div><div class="ach-desc">Complete 3 quizzes</div></div></div>
+          <div class="ach" id="a-notes"><div class="ach-ico">📚</div><div><div class="ach-name">Note Taker</div><div class="ach-desc">Save 3 notes</div></div></div>
+          <div class="ach" id="a-3subj"><div class="ach-ico">🌍</div><div><div class="ach-name">Explorer</div><div class="ach-desc">Study 3 subjects</div></div></div>
+          <div class="ach" id="a-perf"><div class="ach-ico">⭐</div><div><div class="ach-name">Perfect Score</div><div class="ach-desc">Get 5/5 on quiz</div></div></div>
+          <div class="ach" id="a-10msg"><div class="ach-ico">🔥</div><div><div class="ach-name">On Fire</div><div class="ach-desc">Send 10 messages</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end app -->
+
+<script>
+/* ============================================================
+   NOVA — PURE OFFLINE AI LEARNING COMPANION
+   Version: 3.0 | Zero internet dependencies
+   All knowledge is built-in. Open file → works forever.
+   ============================================================ */
+
+// ──────────────────────────────────────────
+//  SUBJECTS
+// ──────────────────────────────────────────
+const SUBJECTS = [
+  {id:'prog',  label:'Programming', icon:'💻'},
+  {id:'math',  label:'Mathematics', icon:'📐'},
+  {id:'sci',   label:'Science',     icon:'🔬'},
+  {id:'hist',  label:'History',     icon:'📜'},
+  {id:'lang',  label:'Language',    icon:'✍️'},
+  {id:'phil',  label:'Philosophy',  icon:'🤔'},
+];
+
+// ──────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────
+const DEF = {
+  subj:'prog', chats:0, quizDone:0, quizScores:[],
+  topics:[], notes:[], studied:[], unlocked:[]
+};
+let G = {...DEF};
+
+function loadG(){
+  try{const d=localStorage.getItem('nova3');if(d)G={...DEF,...JSON.parse(d)}}catch(e){}
+}
+function saveG(){
+  try{localStorage.setItem('nova3',JSON.stringify(G))}catch(e){}
+}
+loadG();
+
+// ──────────────────────────────────────────
+//  KNOWLEDGE BASE  (100% built-in)
+// ──────────────────────────────────────────
+const KB = {
+
+/* ===== PROGRAMMING ===== */
+prog:{
+ welcome:`Welcome to **Programming**! 🖥️
+
+I'm your offline AI tutor. Here's what we can explore:
+
+• **Variables & Data Types** — storing information
+• **Control Flow** — if/else, loops, conditions
+• **Functions** — reusable code blocks
+• **Object-Oriented Programming** — classes & objects
+• **Data Structures** — lists, dictionaries, trees
+• **Algorithms** — sorting, searching, recursion
+• **Debugging** — finding and fixing bugs
+
+Ask me about any topic — I work 100% offline!`,
+
+ topics:{
+  variable:`**Variables** store data that can change.
+
+\`\`\`python
+name = "Alice"      # string
+age  = 25           # integer
+gpa  = 3.8          # float
+pass = True         # boolean
+\`\`\`
+
+**Key rules:**
+• Case-sensitive: \`age\` ≠ \`Age\`
+• Cannot start with a number
+• Use underscores: \`first_name\`
+• Cannot be a keyword: \`if\`, \`for\`, \`class\`
+
+**Reassignment:**
+\`\`\`python
+score = 0
+score = score + 10   # score is now 10
+score += 5           # score is now 15
+\`\`\``,
+
+  'data type':`**Data Types** — what kind of value a variable holds:
+
+| Type    | Example           | Use case          |
+|---------|-------------------|-------------------|
+| \`int\`   | \`42\`              | Whole numbers     |
+| \`float\` | \`3.14\`            | Decimal numbers   |
+| \`str\`   | \`"Hello"\`         | Text              |
+| \`bool\`  | \`True\` / \`False\` | Yes/No logic      |
+| \`list\`  | \`[1, 2, 3]\`       | Ordered items     |
+| \`dict\`  | \`{"a": 1}\`        | Key-value pairs   |
+| \`tuple\` | \`(1, 2)\`          | Immutable list    |
+| \`set\`   | \`{1, 2, 3}\`       | Unique items only |
+
+\`\`\`python
+x = 10
+print(type(x))    # <class 'int'>
+
+y = "hello"
+print(type(y))    # <class 'str'>
+
+# Type conversion:
+n = int("42")     # str → int
+s = str(99)       # int → str
+f = float("3.14") # str → float
+\`\`\``,
+
+  loop:`**Loops** repeat code without rewriting it.
+
+**For loop** — iterate a fixed number of times:
+\`\`\`python
+for i in range(5):
+    print(i)      # 0, 1, 2, 3, 4
+
+# Loop over a list:
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+\`\`\`
+
+**While loop** — repeat while condition is True:
+\`\`\`python
+count = 0
+while count < 5:
+    print(count)
+    count += 1
+\`\`\`
+
+**Loop controls:**
+\`\`\`python
+for i in range(10):
+    if i == 3: continue   # skip 3
+    if i == 7: break      # stop at 7
+    print(i)
+\`\`\`
+
+⚠️ **Infinite loop danger:** Always make sure while conditions become False!`,
+
+  function:`**Functions** are reusable named blocks of code.
+
+\`\`\`python
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Alice"))   # Hello, Alice!
+print(greet("Bob"))     # Hello, Bob!
+\`\`\`
+
+**Multiple parameters:**
+\`\`\`python
+def add(a, b):
+    return a + b
+
+def power(base, exp=2):   # default parameter
+    return base ** exp
+
+print(add(3, 4))          # 7
+print(power(5))            # 25  (uses default exp=2)
+print(power(2, 10))        # 1024
+\`\`\`
+
+**Scope — local vs global:**
+\`\`\`python
+x = 10           # global
+
+def show():
+    x = 99       # local (different x!)
+    print(x)     # 99
+
+show()
+print(x)         # 10 (global unchanged)
+\`\`\``,
+
+  'if':`**Conditionals** make decisions based on conditions.
+
+\`\`\`python
+age = 18
+
+if age >= 18:
+    print("Adult — can vote!")
+elif age >= 16:
+    print("Teen — can drive!")
+elif age >= 13:
+    print("Teenager")
+else:
+    print("Child")
+\`\`\`
+
+**Comparison operators:**
+\`\`\`
+==   equal to
+!=   not equal to
+>    greater than
+<    less than
+>=   greater than or equal
+<=   less than or equal
+\`\`\`
+
+**Logical operators:**
+\`\`\`python
+if age >= 18 and has_id:
+    print("Welcome to the club!")
+
+if is_student or has_coupon:
+    print("50% discount applied!")
+
+if not is_banned:
+    print("Access granted")
+\`\`\`
+
+**Ternary (one-line if):**
+\`\`\`python
+result = "pass" if score >= 50 else "fail"
+\`\`\``,
+
+  oop:`**OOP — Object-Oriented Programming** organizes code as objects.
+
+\`\`\`python
+class Animal:
+    def __init__(self, name, sound):
+        self.name = name
+        self.sound = sound
+
+    def speak(self):
+        return f"{self.name} says {self.sound}!"
+
+    def __str__(self):
+        return f"Animal({self.name})"
+
+# Create instances:
+dog = Animal("Rex", "Woof")
+cat = Animal("Whiskers", "Meow")
+
+print(dog.speak())     # Rex says Woof!
+print(cat.speak())     # Whiskers says Meow!
+\`\`\`
+
+**Inheritance:**
+\`\`\`python
+class Dog(Animal):
+    def __init__(self, name, breed):
+        super().__init__(name, "Woof")
+        self.breed = breed
+
+    def fetch(self):
+        return f"{self.name} fetches the ball!"
+
+d = Dog("Buddy", "Labrador")
+print(d.speak())    # Buddy says Woof!
+print(d.fetch())    # Buddy fetches the ball!
+\`\`\`
+
+**4 Pillars of OOP:**
+• **Encapsulation** — bundle data + methods
+• **Inheritance** — child class gets parent features
+• **Polymorphism** — same method, different behavior
+• **Abstraction** — hide complexity`,
+
+  algorithm:`**Algorithms** are step-by-step instructions to solve problems.
+
+**Bubble Sort** — compare & swap adjacent elements:
+\`\`\`python
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(n - i - 1):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+    return arr
+
+print(bubble_sort([5, 3, 8, 1, 2]))
+# [1, 2, 3, 5, 8]
+\`\`\`
+
+**Binary Search** — O(log n) search in sorted list:
+\`\`\`python
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid         # found!
+        elif arr[mid] < target:
+            left = mid + 1     # search right half
+        else:
+            right = mid - 1    # search left half
+    return -1                  # not found
+
+nums = [1, 3, 5, 7, 9, 11]
+print(binary_search(nums, 7))  # 3 (index)
+\`\`\`
+
+**Time Complexity:**
+\`\`\`
+O(1)      — constant    (best)
+O(log n)  — logarithmic (great)
+O(n)      — linear      (ok)
+O(n²)     — quadratic   (slow)
+O(2ⁿ)     — exponential (avoid!)
+\`\`\``,
+
+  recursion:`**Recursion** — a function that calls itself.
+
+**Golden rule:** Every recursive function needs:
+1. A **base case** (when to STOP)
+2. A **recursive call** (moving toward base)
+
+**Factorial:**
+\`\`\`python
+def factorial(n):
+    if n <= 1:              # base case
+        return 1
+    return n * factorial(n - 1)  # recursive
+
+print(factorial(5))   # 120
+# 5 × 4 × 3 × 2 × 1 = 120
+\`\`\`
+
+**Fibonacci:**
+\`\`\`python
+def fib(n):
+    if n <= 1:              # base case
+        return n
+    return fib(n-1) + fib(n-2)
+
+for i in range(8):
+    print(fib(i), end=" ")
+# 0 1 1 2 3 5 8 13
+\`\`\`
+
+**Faster with memoization:**
+\`\`\`python
+cache = {}
+def fib_fast(n):
+    if n in cache: return cache[n]
+    if n <= 1: return n
+    cache[n] = fib_fast(n-1) + fib_fast(n-2)
+    return cache[n]
+\`\`\``,
+
+  'data structure':`**Data Structures** organize data for efficient use.
+
+**List** — ordered, mutable:
+\`\`\`python
+nums = [1, 2, 3, 4, 5]
+nums.append(6)        # [1,2,3,4,5,6]
+nums.insert(0, 0)     # [0,1,2,3,4,5,6]
+nums.pop()            # removes last
+nums[2]               # access index 2
+nums[-1]              # last element
+nums[1:4]             # slice [1,2,3]
+\`\`\`
+
+**Dictionary** — key-value pairs:
+\`\`\`python
+person = {"name":"Alice","age":25,"city":"NY"}
+person["email"] = "a@b.com"   # add
+del person["city"]             # delete
+"name" in person               # True
+person.get("phone","N/A")      # safe access
+\`\`\`
+
+**Set** — unique items only:
+\`\`\`python
+s = {1, 2, 3, 2, 1}   # {1, 2, 3}
+s.add(4)
+s1 | s2   # union
+s1 & s2   # intersection
+s1 - s2   # difference
+\`\`\`
+
+**Stack (LIFO) using list:**
+\`\`\`python
+stack = []
+stack.append("a")    # push
+stack.append("b")
+stack.pop()          # "b" — last in, first out
+\`\`\``,
+
+ },
+ fallback:`I can explain these Programming topics:
+
+• **Variables** — storing and using data
+• **Data types** — int, str, list, dict, etc.
+• **Loops** — for, while, break, continue
+• **Functions** — defining, calling, parameters
+• **If/else** — conditions and decisions
+• **OOP** — classes, objects, inheritance
+• **Algorithms** — sorting, searching
+• **Recursion** — self-calling functions
+• **Data structures** — list, dict, set, stack
+
+Just ask! Example: *"Explain recursion"* or *"What is OOP?"*`
+},
+
+/* ===== MATHEMATICS ===== */
+math:{
+ welcome:`Welcome to **Mathematics**! 📐
+
+Topics we can explore:
+
+• **Algebra** — equations, quadratics, systems
+• **Calculus** — derivatives, integrals, limits
+• **Statistics** — mean, median, std deviation
+• **Probability** — basic rules, Bayes' theorem
+• **Geometry** — shapes, area, volume, trig
+• **Number Theory** — primes, GCD, modular arithmetic
+• **Linear Algebra** — vectors, matrices, determinants
+
+What would you like to master?`,
+
+ topics:{
+  algebra:`**Algebra** — solving equations with unknowns.
+
+**Linear equations:**
+\`\`\`
+3x + 7 = 22
+3x = 22 - 7 = 15
+x  = 15 / 3 = 5  ✓
+\`\`\`
+
+**Quadratic formula** (ax² + bx + c = 0):
+\`\`\`
+        -b ± √(b² - 4ac)
+x = ———————————————————
+              2a
+\`\`\`
+Example: x² - 5x + 6 = 0 (a=1, b=-5, c=6)
+\`\`\`
+x = (5 ± √(25-24)) / 2
+x = (5 ± 1) / 2
+x = 3  or  x = 2  ✓
+\`\`\`
+
+**Systems of equations:**
+\`\`\`
+x + y  = 10  →  (add them)
+x - y  =  4
+——————————
+2x     = 14  →  x = 7
+              →  y = 3  ✓
+\`\`\`
+
+**Inequalities:**
+\`\`\`
+2x + 3 > 11
+2x > 8
+x > 4   (flip sign when dividing by negative!)
+\`\`\``,
+
+  calculus:`**Calculus** — mathematics of change.
+
+**Derivatives** (rate of change / slope):
+\`\`\`
+Power Rule:   d/dx(xⁿ) = n·xⁿ⁻¹
+
+d/dx(x²)   = 2x
+d/dx(x³)   = 3x²
+d/dx(5x)   = 5
+d/dx(7)    = 0      (constants vanish)
+d/dx(eˣ)   = eˣ
+d/dx(ln x) = 1/x
+d/dx(sin x)= cos x
+d/dx(cos x)= -sin x
+\`\`\`
+
+**Chain Rule** (composite functions):
+\`\`\`
+d/dx[f(g(x))] = f'(g(x)) · g'(x)
+
+d/dx[(3x+1)⁵] = 5(3x+1)⁴ · 3 = 15(3x+1)⁴
+\`\`\`
+
+**Integrals** (area under curve):
+\`\`\`
+∫ xⁿ dx = xⁿ⁺¹/(n+1) + C
+
+∫ x²  dx = x³/3  + C
+∫ 3x  dx = 3x²/2 + C
+∫ eˣ  dx = eˣ    + C
+∫ 1/x dx = ln|x| + C
+\`\`\`
+
+**Definite integral** (actual area):
+\`\`\`
+∫₀² x² dx = [x³/3]₀² = 8/3 - 0 = 8/3
+\`\`\``,
+
+  probability:`**Probability** — measuring chance.
+
+**Basic formula:**
+\`\`\`
+P(event) = favourable outcomes / total outcomes
+\`\`\`
+
+**Examples:**
+\`\`\`
+Coin flip:  P(heads) = 1/2  = 0.5  = 50%
+Die roll:   P(6)     = 1/6  ≈ 0.167 = 16.7%
+Card deck:  P(Ace)   = 4/52 = 1/13 ≈ 7.7%
+\`\`\`
+
+**Rules:**
+\`\`\`
+Addition:     P(A or B)  = P(A) + P(B) - P(A∩B)
+Multiplication:P(A and B) = P(A) × P(B)  [if independent]
+Complement:   P(not A)   = 1 - P(A)
+\`\`\`
+
+**Conditional probability:**
+\`\`\`
+P(A|B) = P(A and B) / P(B)
+"Probability of A given B already happened"
+\`\`\`
+
+**Bayes' Theorem:**
+\`\`\`
+P(A|B) = P(B|A) × P(A) / P(B)
+\`\`\``,
+
+  statistics:`**Statistics** — understanding data.
+
+**Given data:** [4, 7, 7, 9, 11, 13]
+
+\`\`\`
+Mean   = (4+7+7+9+11+13)/6 = 51/6 = 8.5
+Median = (7+9)/2 = 8         (middle two, n even)
+Mode   = 7                   (appears most)
+Range  = 13 - 4 = 9
+\`\`\`
+
+**Variance & Std Dev:**
+\`\`\`
+1. Find mean (x̄) = 8.5
+2. Differences from mean: -4.5, -1.5, -1.5, 0.5, 2.5, 4.5
+3. Square them: 20.25, 2.25, 2.25, 0.25, 6.25, 20.25
+4. Variance = avg of squares = 51.5/6 ≈ 8.58
+5. Std Dev (σ) = √8.58 ≈ 2.93
+\`\`\`
+
+**Normal Distribution (bell curve):**
+\`\`\`
+68% of data falls within  ±1σ of mean
+95% of data falls within  ±2σ of mean
+99.7% of data falls within ±3σ of mean
+\`\`\`
+
+**z-score** (how many std devs from mean):
+\`\`\`
+z = (x - μ) / σ
+\`\`\``,
+
+  geometry:`**Geometry** — shapes, space, and measurement.
+
+**2D Shapes:**
+\`\`\`
+Circle:      Area = π·r²        Circumference = 2πr
+Rectangle:   Area = l × w       Perimeter = 2(l+w)
+Triangle:    Area = ½ × b × h   Perimeter = a+b+c
+Trapezoid:   Area = ½(a+b) × h
+\`\`\`
+
+**Pythagorean Theorem** (right triangles):
+\`\`\`
+a² + b² = c²    (c = hypotenuse)
+
+Example: legs = 3, 4
+3² + 4² = 9 + 16 = 25
+c = √25 = 5  ✓  (3-4-5 Pythagorean triple!)
+\`\`\`
+
+**3D Shapes:**
+\`\`\`
+Sphere:    Volume = (4/3)πr³    Surface = 4πr²
+Cube:      Volume = s³          Surface = 6s²
+Cylinder:  Volume = πr²h        Surface = 2πr² + 2πrh
+Cone:      Volume = (1/3)πr²h
+\`\`\`
+
+**Trigonometry (right triangles):**
+\`\`\`
+sin θ = opposite / hypotenuse
+cos θ = adjacent / hypotenuse
+tan θ = opposite / adjacent
+
+Mnemonic: SOH-CAH-TOA
+\`\`\``,
+
+  prime:`**Prime Numbers** — divisible only by 1 and themselves.
+
+**Primes:** 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37...
+
+**Testing primality** — check up to √n:
+\`\`\`
+Is 37 prime?
+√37 ≈ 6.08 → check 2, 3, 5
+37 ÷ 2 = 18.5  ✗
+37 ÷ 3 = 12.3  ✗
+37 ÷ 5 = 7.4   ✗
+→ 37 IS prime! ✓
+
+Is 49 prime?
+49 ÷ 7 = 7  ✓  → NOT prime (7×7=49)
+\`\`\`
+
+**Fundamental Theorem of Arithmetic:**
+Every integer > 1 has a unique prime factorization:
+\`\`\`
+60  = 2² × 3 × 5
+84  = 2² × 3 × 7
+100 = 2² × 5²
+210 = 2 × 3 × 5 × 7
+\`\`\`
+
+**GCD (Greatest Common Divisor) — Euclidean algorithm:**
+\`\`\`
+GCD(48, 18):
+48 = 2 × 18 + 12
+18 = 1 × 12 + 6
+12 = 2 × 6  + 0
+→ GCD = 6
+\`\`\``,
+
+ },
+ fallback:`I can help with these Math topics:
+
+• **Algebra** — equations, quadratics, systems
+• **Calculus** — derivatives, integrals
+• **Probability** — rules, Bayes' theorem
+• **Statistics** — mean, std dev, distributions
+• **Geometry** — shapes, Pythagoras, trig
+• **Primes** — primality, factorization, GCD
+
+Ask: *"Explain calculus"* or *"How do I solve quadratics?"*`
+},
+
+/* ===== SCIENCE ===== */
+sci:{
+ welcome:`Welcome to **Science**! 🔬
+
+Let's explore the natural world:
+
+• **Physics** — motion, forces, energy, waves
+• **Chemistry** — atoms, bonds, reactions
+• **Biology** — cells, DNA, genetics, evolution
+• **Astronomy** — stars, planets, universe
+• **Earth Science** — geology, climate, ecosystems
+
+What topic shall we dive into?`,
+
+ topics:{
+  newton:`**Newton's Laws of Motion**
+
+**1st Law — Inertia:**
+"An object at rest stays at rest; an object in motion stays in motion, unless acted on by a net external force."
+→ *A book on a table stays still. A rolling ball slows due to friction.*
+
+**2nd Law — F = ma:**
+\`\`\`
+Force = mass × acceleration
+
+Example:
+  mass = 10 kg, force = 50 N
+  a = F/m = 50/10 = 5 m/s²
+\`\`\`
+
+**3rd Law — Action-Reaction:**
+"For every action there is an equal and opposite reaction."
+→ *You push a wall → wall pushes back.*
+→ *Rocket expels gas down → rocket moves up.*
+
+**Gravity:**
+\`\`\`
+F = G × m₁ × m₂ / r²
+
+g = 9.8 m/s²  (Earth's surface)
+g = 1.6 m/s²  (Moon's surface)
+\`\`\`
+
+**Kinematics (uniform acceleration):**
+\`\`\`
+v = u + at          (velocity)
+s = ut + ½at²       (distance)
+v² = u² + 2as       (no time needed)
+\`\`\``,
+
+  atom:`**Atoms** — the building blocks of all matter.
+
+**Structure:**
+\`\`\`
+         Nucleus
+        ┌────────┐
+        │ ⊕⊕⊕   │  ← Protons  (positive, mass ≈ 1 amu)
+        │ ○○○   │  ← Neutrons (neutral,  mass ≈ 1 amu)
+        └────────┘
+   ⚡ ⚡ ⚡  Electrons orbit outside (negative, mass ≈ 0)
+\`\`\`
+
+**Key terms:**
+\`\`\`
+Atomic number (Z) = number of protons
+Mass number   (A) = protons + neutrons
+Neutrons          = A - Z
+
+Carbon: Z=6, A=12 → 6 protons, 6 neutrons, 6 electrons
+\`\`\`
+
+**Periodic Table patterns:**
+\`\`\`
+Period  → same number of electron shells
+Group   → same number of valence electrons
+         → similar chemical properties
+\`\`\`
+
+**Isotopes** — same element, different neutrons:
+\`\`\`
+Carbon-12: 6p, 6n (stable, most common)
+Carbon-14: 6p, 8n (radioactive, used in dating)
+\`\`\`
+
+**Ions:**
+\`\`\`
+Cation (+): loses electrons  → Na⁺, Ca²⁺
+Anion  (-): gains electrons  → Cl⁻, O²⁻
+\`\`\``,
+
+  cell:`**Cells** — the basic unit of all life.
+
+**Prokaryotic** (bacteria — no nucleus):
+\`\`\`
+• Cell membrane + cell wall
+• Circular DNA floating in cytoplasm
+• Ribosomes (protein synthesis)
+• No membrane-bound organelles
+\`\`\`
+
+**Eukaryotic** (animals, plants, fungi):
+\`\`\`
+Organelle         Function
+────────────────────────────────────────
+Nucleus           DNA storage, gene expression
+Mitochondria      ATP energy production
+Ribosome          Protein synthesis
+ER (rough)        Protein transport
+ER (smooth)       Lipid synthesis, detox
+Golgi apparatus   Protein sorting & shipping
+Lysosome          Cell digestion, waste removal
+Cell membrane     Controls what enters/exits
+Vacuole           Storage (large in plants)
+Chloroplast       Photosynthesis (plants only)
+Cell wall         Structural support (plants only)
+\`\`\`
+
+**Cell Division:**
+\`\`\`
+Mitosis  → 2 identical daughter cells (growth/repair)
+  Prophase → Metaphase → Anaphase → Telophase
+
+Meiosis  → 4 genetically unique cells (sexual reproduction)
+  Halves chromosome number (diploid → haploid)
+\`\`\``,
+
+  dna:`**DNA** — the blueprint of life.
+
+**Structure — Double Helix:**
+\`\`\`
+5'─A─T─G─C─C─A─3'
+   │ │ │ │ │ │
+3'─T─A─C─G─G─T─5'
+
+Base pairing rules:
+  Adenine  (A) ↔ Thymine  (T)   [2 H-bonds]
+  Guanine  (G) ↔ Cytosine (C)   [3 H-bonds]
+\`\`\`
+
+**Central Dogma:**
+\`\`\`
+DNA → (Transcription) → mRNA → (Translation) → Protein
+\`\`\`
+
+**Key terms:**
+\`\`\`
+Gene        = segment of DNA coding for one protein
+Codon       = 3-base sequence on mRNA
+Anticodon   = complementary sequence on tRNA
+Chromosome  = packaged DNA + proteins (histone)
+Genome      = ALL DNA in an organism
+
+Humans: 46 chromosomes, ~3 billion base pairs
+\`\`\`
+
+**DNA Replication:**
+\`\`\`
+1. Helicase unwinds/unzips double helix
+2. Primase adds RNA primer
+3. DNA Polymerase builds new strand (5'→3')
+4. Ligase seals gaps
+Result: 2 identical double-stranded DNA molecules
+\`\`\``,
+
+  photosynthesis:`**Photosynthesis** — plants making food from sunlight.
+
+**Overall equation:**
+\`\`\`
+6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂
+  ↑       ↑      ↑         ↑         ↑
+carbon  water  light    glucose   oxygen
+dioxide        energy
+\`\`\`
+
+**Where:** Chloroplasts (contain chlorophyll pigment)
+
+**Stage 1 — Light Reactions** (thylakoid membrane):
+\`\`\`
+• Chlorophyll absorbs sunlight (red + blue light)
+• Water splits: 2H₂O → 4H⁺ + 4e⁻ + O₂↑
+• Produces: ATP + NADPH  (energy carriers)
+• Releases: O₂ (what we breathe!)
+\`\`\`
+
+**Stage 2 — Calvin Cycle** (stroma):
+\`\`\`
+• Uses ATP + NADPH from Stage 1
+• "Fixes" CO₂ into organic molecules
+• Produces: G3P → used to make glucose
+• 3 turns of cycle → 1 G3P molecule
+\`\`\`
+
+**Limiting factors:**
+\`\`\`
+• Light intensity (up to a point)
+• CO₂ concentration
+• Temperature (enzymes work best at ~25°C)
+• Water availability
+\`\`\``,
+
+  evolution:`**Evolution** — how species change over time.
+
+**Darwin's 4 Key Observations:**
+\`\`\`
+1. Variation    — individuals in a population differ
+2. Heredity     — traits pass from parents to offspring
+3. Overproduction — more offspring born than survive
+4. Selection    — some variants survive + reproduce better
+Result: Favorable traits become more common over time
+\`\`\`
+
+**Natural Selection in action:**
+\`\`\`
+Peppered Moths (Industrial Revolution, England):
+• Pre-1850: pale moths camouflaged on light trees
+• Post-1850: soot darkened trees → dark moths survived
+• Dark allele frequency increased dramatically
+→ Classic observable evolution!
+\`\`\`
+
+**Types of Selection:**
+\`\`\`
+Directional  → one extreme favored (e.g., longer necks)
+Stabilizing  → middle favored, extremes eliminated
+Disruptive   → both extremes favored (could split species)
+Sexual       → traits for mating success (peacock feathers)
+\`\`\`
+
+**Evidence for Evolution:**
+\`\`\`
+• Fossil record (transitional forms)
+• Comparative anatomy (homologous structures)
+• Molecular biology (shared DNA sequences)
+• Biogeography (species distribution)
+• Direct observation (bacteria, viruses, finches)
+\`\`\``,
+
+ },
+ fallback:`I can explain these Science topics:
+
+• **Newton's Laws** — force, motion, gravity
+• **Atoms** — structure, isotopes, periodic table
+• **Cells** — organelles, mitosis, meiosis
+• **DNA** — structure, replication, central dogma
+• **Photosynthesis** — light reactions, Calvin cycle
+• **Evolution** — natural selection, evidence
+
+Ask: *"Explain DNA"* or *"How does photosynthesis work?"*`
+},
+
+/* ===== HISTORY ===== */
+hist:{
+ welcome:`Welcome to **History**! 📜
+
+Let's explore humanity's story:
+
+• **Ancient World** — Egypt, Greece, Rome, Mesopotamia
+• **Medieval Period** — feudalism, crusades, Black Death
+• **Renaissance & Reformation** — art, science, religion
+• **Age of Exploration** — Columbus, Magellan, colonialism
+• **Industrial Revolution** — factories, democracy, capitalism
+• **World Wars** — WWI, WWII, causes & consequences
+• **Cold War** — USA vs USSR, 1947–1991
+• **Modern History** — decolonization, globalization
+
+Which era interests you?`,
+
+ topics:{
+  'world war':`**World War II (1939–1945)**
+
+**Causes:**
+\`\`\`
+• Treaty of Versailles humiliated Germany (1919)
+• Great Depression → economic instability
+• Rise of fascism: Hitler (Germany), Mussolini (Italy)
+• Japanese imperial expansion in Asia-Pacific
+• Appeasement policy failed (Munich Agreement 1938)
+\`\`\`
+
+**Timeline:**
+\`\`\`
+Sep 1939  Germany invades Poland → Britain & France declare war
+May 1940  Germany conquers France in 6 weeks (Blitzkrieg)
+Jul 1940  Battle of Britain (RAF vs Luftwaffe air war)
+Jun 1941  Operation Barbarossa: Germany invades USSR
+Dec 1941  Pearl Harbor → USA enters the war
+Nov 1942  Battle of Stalingrad — turning point on Eastern Front
+Jun 1944  D-Day: Allied landings at Normandy, France
+May 1945  Germany surrenders (V-E Day)
+Aug 1945  Atomic bombs on Hiroshima & Nagasaki → Japan surrenders
+\`\`\`
+
+**Holocaust:**
+\`\`\`
+• Nazi genocide of Jews and other groups
+• ~6 million Jews murdered in concentration camps
+• Also killed: Roma, disabled, LGBTQ+, Soviets
+\`\`\`
+
+**Aftermath:**
+\`\`\`
+• ~70–85 million deaths (deadliest conflict in history)
+• United Nations founded (1945)
+• Marshall Plan rebuilt Western Europe
+• Cold War begins (USA vs USSR)
+• Israel established (1948)
+• Decolonization wave in Asia & Africa
+\`\`\``,
+
+  rome:`**Ancient Rome** — civilization that shaped the Western world.
+
+**Timeline:**
+\`\`\`
+753 BCE   Rome founded (legendary: Romulus & Remus)
+509 BCE   Roman Republic established
+264 BCE   Punic Wars begin vs Carthage
+  44 BCE  Julius Caesar assassinated (Ides of March)
+  27 BCE  Augustus → first Roman Emperor
+  79 CE   Vesuvius erupts, buries Pompeii
+ 117 CE   Empire at greatest extent (Trajan)
+ 284 CE   Diocletian splits empire East/West
+ 380 CE   Christianity becomes official religion
+ 410 CE   Visigoths sack Rome
+ 476 CE   Last Western Emperor deposed → fall of WRE
+1453 CE   Eastern Empire (Byzantium) falls to Ottomans
+\`\`\`
+
+**Roman Government:**
+\`\`\`
+Republic:  Two Consuls + Senate + Assemblies
+Empire:    Emperor + Senate (advisory only)
+\`\`\`
+
+**Legacy:**
+\`\`\`
+Law         → Roman law basis of modern legal systems
+Language    → Latin → French, Spanish, Italian, Portuguese
+Engineering → Roads, aqueducts, arches, concrete (opus caementicium)
+Government  → Senate, republic concepts, civic law
+Religion    → Christianity spread via Roman infrastructure
+\`\`\``,
+
+  renaissance:`**The Renaissance** (c. 1300–1600) — "Rebirth"
+
+**Where & Why:**
+\`\`\`
+• Started in Italian city-states: Florence, Venice, Rome
+• Wealth from trade → patronage of arts
+• Rediscovery of Greek & Roman texts
+• Fall of Constantinople (1453) → scholars fled to Italy
+\`\`\`
+
+**Key Ideas:**
+\`\`\`
+Humanism      → focus on human potential, secular life
+Individualism → worth of the individual person
+Empiricism    → observe the world, not just scripture
+Naturalism    → art depicting realistic human figures
+\`\`\`
+
+**Famous Figures:**
+\`\`\`
+Leonardo da Vinci (1452–1519)
+  → Mona Lisa, The Last Supper, flying machine designs
+
+Michelangelo (1475–1564)
+  → Sistine Chapel ceiling, David sculpture, St. Peter's dome
+
+Galileo Galilei (1564–1642)
+  → Telescope, confirmed heliocentrism, laws of motion
+
+Copernicus (1473–1543)
+  → Sun (not Earth) at centre of solar system
+
+Shakespeare (1564–1616)
+  → Hamlet, Macbeth, Romeo & Juliet
+
+Gutenberg (c.1400–1468)
+  → Printing press (1440) → spread of knowledge!
+\`\`\`
+
+**Impact:**
+Led directly to the Scientific Revolution, Protestant Reformation, and Age of Exploration.`,
+
+  'cold war':`**The Cold War (1947–1991)**
+
+**Why "cold"?**
+No direct military conflict between USA and USSR — instead: arms race, proxy wars, espionage, and ideological competition.
+
+**Two Blocs:**
+\`\`\`
+USA (West)              USSR (East)
+————————————————————————————————
+Capitalism              Communism
+Liberal democracy       One-party state
+NATO alliance           Warsaw Pact
+Marshall Plan           Comecon
+\`\`\`
+
+**Key Events:**
+\`\`\`
+1947  Truman Doctrine — contain communism
+1948  Berlin Blockade/Airlift
+1949  NATO founded; USSR tests nuclear bomb; China goes communist
+1950  Korean War begins (1950–1953)
+1957  Sputnik launched → Space Race begins!
+1961  Berlin Wall built; Yuri Gagarin in space
+1962  Cuban Missile Crisis — closest to nuclear war
+1963  JFK assassinated; Hotline established
+1969  Apollo 11 — USA lands on Moon 🌕
+1979  USSR invades Afghanistan
+1989  Berlin Wall falls (Nov 9)
+1991  USSR dissolves → Cold War ends
+\`\`\`
+
+**Arms Race:**
+\`\`\`
+USA tests A-bomb    1945
+USSR tests A-bomb   1949
+USA tests H-bomb    1952
+USSR tests H-bomb   1953
+MAD (Mutually Assured Destruction) = deterrent
+\`\`\``,
+
+ },
+ fallback:`I can teach these History topics:
+
+• **World Wars** — WWI & WWII, causes & effects
+• **Ancient Rome** — republic, empire, fall
+• **Renaissance** — art, science, humanism
+• **Cold War** — USA vs USSR, key events
+• **Ancient civilizations** — Egypt, Greece
+• **Modern history** — revolutions, colonialism
+
+Ask: *"Tell me about the Cold War"* or *"What caused WWII?"*`
+},
+
+/* ===== LANGUAGE ===== */
+lang:{
+ welcome:`Welcome to **Language & Writing**! ✍️
+
+Here's what we can work on:
+
+• **Grammar** — parts of speech, sentence structure
+• **Essay Writing** — thesis, structure, paragraphs
+• **Punctuation** — commas, semicolons, colons
+• **Literary Devices** — metaphor, simile, irony
+• **Vocabulary** — roots, prefixes, word building
+• **Style & Tone** — formal, informal, persuasive
+
+What would you like to improve?`,
+
+ topics:{
+  grammar:`**English Grammar — The Essentials**
+
+**8 Parts of Speech:**
+\`\`\`
+Noun        person, place, thing, idea  (dog, London, love)
+Pronoun     replaces noun               (he, she, they, it)
+Verb        action or state             (run, is, seem, have)
+Adjective   describes noun              (red, tall, brilliant)
+Adverb      modifies verb/adj/adverb    (quickly, very, never)
+Preposition shows relationship          (in, on, at, by, from)
+Conjunction connects words/clauses     (and, but, or, because)
+Interjection expresses emotion         (Oh! Wow! Ouch!)
+\`\`\`
+
+**Common Errors:**
+\`\`\`
+Its  vs  It's:
+  Its   = possessive  ("The dog wagged its tail.")
+  It's  = it is       ("It's raining outside.")
+
+Their / There / They're:
+  Their  = possession  ("Their car is red.")
+  There  = place       ("Put it over there.")
+  They're = they are   ("They're coming at 8.")
+
+Affect vs Effect:
+  Affect = verb    ("The music affected her mood.")
+  Effect = noun    ("The effect was immediate.")
+
+Less vs Fewer:
+  Less   = uncountable ("less water", "less time")
+  Fewer  = countable   ("fewer students", "fewer cars")
+\`\`\`
+
+**Sentence Types:**
+\`\`\`
+Simple:    One independent clause.
+           "The dog barked."
+
+Compound:  Two independent clauses + conjunction.
+           "The dog barked, and the cat ran away."
+
+Complex:   Independent + dependent clause.
+           "Although it rained, we finished the race."
+
+Compound-Complex: Mix of both.
+           "She studied hard, and because she did, she passed."
+\`\`\``,
+
+  essay:`**How to Write a Strong Essay**
+
+**5-Paragraph Structure:**
+\`\`\`
+1. INTRODUCTION
+   • Hook — grab reader's attention
+     (shocking fact, question, quote, anecdote)
+   • Context — provide background
+   • Thesis — your main argument (1-2 sentences)
+
+2–4. BODY PARAGRAPHS (one point each)
+   • Topic sentence — state the paragraph's argument
+   • Evidence — quote, statistic, example
+   • Analysis — explain HOW evidence supports thesis
+   • Transition — link to next paragraph
+
+5. CONCLUSION
+   • Restate thesis (in new words!)
+   • Summarize key points
+   • Broader significance / call to action
+\`\`\`
+
+**Weak vs Strong Thesis:**
+\`\`\`
+❌ Weak:   "Social media has good and bad sides."
+           (vague, no argument)
+
+✅ Strong: "Algorithmic social media design—not weak 
+           willpower—drives teen addiction, demanding 
+           regulatory reform rather than individual fixes."
+           (specific, arguable, tells reader your position)
+\`\`\`
+
+**PEEL paragraph method:**
+\`\`\`
+P — Point      (topic sentence — your claim)
+E — Evidence   (quote, data, example)
+E — Explain    (how does evidence prove your point?)
+L — Link       (connect back to thesis / next paragraph)
+\`\`\``,
+
+  literary:`**Literary Devices** — tools that make writing powerful.
+
+**Figurative Language:**
+\`\`\`
+Simile          comparison using "like" or "as"
+  "Her voice was like warm honey."
+
+Metaphor        direct comparison (no like/as)
+  "Life is a rollercoaster."
+
+Personification giving human traits to non-human things
+  "The trees whispered in the wind."
+
+Hyperbole       extreme exaggeration for effect
+  "I've told you a million times!"
+
+Irony           saying the opposite of what you mean
+  "Oh great, another Monday." (sarcastic)
+
+Oxymoron        contradictory terms together
+  "deafening silence" / "bittersweet"
+
+Alliteration    repeated initial consonant sounds
+  "Peter Piper picked a peck..."
+
+Onomatopoeia    words that sound like their meaning
+  "buzz", "crash", "sizzle", "murmur"
+\`\`\`
+
+**Structural Devices:**
+\`\`\`
+Foreshadowing   hints at future events
+Flashback       returning to earlier time (in medias res)
+Cliffhanger     ending that creates suspense
+Motif           recurring symbol/theme throughout work
+Foil            character who contrasts with protagonist
+Unreliable narrator narrator whose account is questionable
+\`\`\`
+
+**Poetic Devices:**
+\`\`\`
+Rhyme scheme    ABAB, AABB, ABCABC
+Iambic pentameter 10 syllables, da-DUM pattern (Shakespeare)
+Enjambment      sentence continues past end of line
+Caesura         pause within a line of verse
+\`\`\``,
+
+  punctuation:`**Punctuation Rules**
+
+**Comma (,):**
+\`\`\`
+• List items: "I need eggs, milk, and butter."
+• Before coordinating conjunctions: "I ran, but she walked."
+• After introductory clause: "After the rain, we went out."
+• Non-essential clauses: "My friend, who is a doctor, helped."
+• Direct address: "Come here, John."
+\`\`\`
+
+**Semicolon (;):**
+\`\`\`
+• Join related independent clauses:
+  "I love coffee; I can't function without it."
+• Separate items in complex lists:
+  "London, UK; Paris, France; Berlin, Germany."
+\`\`\`
+
+**Colon (:):**
+\`\`\`
+• Introduce a list: "I need three things: patience, time, coffee."
+• Introduce a quotation or explanation.
+• After a complete sentence before elaboration.
+\`\`\`
+
+**Apostrophe ('):**
+\`\`\`
+• Possessive:    "John's car" / "the dogs' bowls" (plural)
+• Contraction:   "don't" (do not) / "it's" (it is)
+• NEVER for plurals: ❌ "apple's" ✅ "apples"
+\`\`\`
+
+**Dash (—) vs Hyphen (-):**
+\`\`\`
+Em dash (—): interruption or emphasis
+  "She finally agreed—after much persuasion—to come."
+Hyphen (-): compound words or numbers
+  "well-known author" / "twenty-one"
+\`\`\``,
+
+ },
+ fallback:`I can help with these Language topics:
+
+• **Grammar** — parts of speech, sentence structure, common errors
+• **Essay writing** — structure, thesis, PEEL paragraphs
+• **Literary devices** — simile, metaphor, irony, foreshadowing
+• **Punctuation** — comma, semicolon, apostrophe rules
+• **Vocabulary** — word roots, prefixes, usage
+
+Ask: *"Explain grammar"* or *"How do I write a strong essay?"*`
+},
+
+/* ===== PHILOSOPHY ===== */
+phil:{
+ welcome:`Welcome to **Philosophy**! 🤔
+
+Philosophy asks the deepest questions:
+
+• **Ethics** — What is right and wrong?
+• **Epistemology** — What can we know?
+• **Metaphysics** — What is real?
+• **Logic** — How do we reason correctly?
+• **Political Philosophy** — What is justice?
+• **Philosophy of Mind** — What is consciousness?
+• **Great Thinkers** — Socrates, Plato, Aristotle, Kant, Nietzsche...
+
+What shall we explore?`,
+
+ topics:{
+  ethics:`**Ethics** — the study of right and wrong.
+
+**3 Major Ethical Theories:**
+
+**1. Consequentialism (Utilitarianism)**
+\`\`\`
+• Right action = produces greatest good for greatest number
+• Founders: Jeremy Bentham, John Stuart Mill
+• Formula: maximize total happiness (utility)
+• Strength: practical, considers outcomes
+• Weakness: can justify harming minorities for majority good
+\`\`\`
+
+**2. Deontology (Kantian Ethics)**
+\`\`\`
+• Right action = follows moral duty/rules regardless of outcome
+• Founder: Immanuel Kant (1724–1804)
+• Categorical Imperative: "Act only according to maxims
+  you could will to be universal laws."
+• Strength: protects individual rights
+• Weakness: rigid; lying always wrong even to save a life?
+\`\`\`
+
+**3. Virtue Ethics (Aristotle)**
+\`\`\`
+• Right action = what a virtuous person would do
+• Focus on character, not rules or consequences
+• Key virtues: courage, justice, honesty, compassion
+• "Golden Mean": virtue is the midpoint between extremes
+  (courage = between cowardice and recklessness)
+• Strength: focuses on human flourishing
+\`\`\`
+
+**The Trolley Problem:**
+\`\`\`
+A runaway trolley will kill 5 people.
+You can divert it, killing 1 instead.
+Do you pull the lever?
+
+Utilitarian → YES  (5 > 1, save more lives)
+Kantian     → NO   (using a person as a mere means)
+Virtue      → ???  (what would a virtuous person do?)
+\`\`\``,
+
+  socrates:`**Socrates (470–399 BCE)** — "The Father of Western Philosophy"
+
+**The Man:**
+\`\`\`
+• Athenian philosopher; never wrote anything himself
+• We know him through Plato's dialogues
+• Spent his life questioning people in the agora (marketplace)
+• Claimed the Oracle at Delphi said no one was wiser
+• His response: at least he knew he knew nothing!
+\`\`\`
+
+**The Socratic Method:**
+\`\`\`
+Step 1: Claim  "What is courage?"
+               "Courage is not running from danger."
+Step 2: Probe  "Was Ajax courageous when he killed himself?"
+               "Well... yes?"
+Step 3: Expose "But that IS running from his shame."
+               "So your definition is flawed."
+Step 4: Refine Define more carefully and repeat...
+Result: Deeper understanding through dialectic!
+\`\`\`
+
+**Key Quotes:**
+\`\`\`
+"I know that I know nothing."
+"The unexamined life is not worth living."
+"Virtue is knowledge; wrongdoing is ignorance."
+\`\`\`
+
+**Trial & Death (399 BCE):**
+\`\`\`
+Charges: Corrupting the youth + impiety
+Verdict: Guilty (280 to 220 votes)
+Sentence: Death by hemlock
+Response: Refused to flee → drank hemlock calmly
+Legacy:  Created Western philosophical tradition
+\`\`\``,
+
+  'free will':`**Free Will** — Do we truly choose our actions?
+
+**The Core Debate:**
+
+**Hard Determinism:**
+\`\`\`
+• Every event is caused by prior events (physics/brain states)
+• Your "choices" are just the inevitable result of prior causes
+• Implication: moral responsibility is an illusion
+• Thinkers: Laplace, Spinoza
+\`\`\`
+
+**Libertarian Free Will:** (not the politics!)
+\`\`\`
+• We have genuine ability to have acted otherwise
+• Free will requires "agent causation" beyond physical causes
+• Necessary for true moral responsibility
+• Problem: how does an immaterial will influence the brain?
+\`\`\`
+
+**Compatibilism:** (most popular view today)
+\`\`\`
+• Free will AND determinism can both be true
+• "Free" means: acting from your own desires and reasons,
+  without external coercion
+• We can hold people responsible even if determined
+• Thinkers: Hume, Kant, Frankfurt, Dennett
+\`\`\`
+
+**The Neuroscience Problem:**
+\`\`\`
+Benjamin Libet's experiment (1983):
+• Brain shows "readiness potential" 0.5s BEFORE
+  subjects consciously decide to move
+• Suggests: unconscious brain initiates "voluntary" acts
+• Does consciousness just ratify brain's prior decision?
+• Still heavily debated!
+\`\`\``,
+
+  logic:`**Logic** — the study of correct reasoning.
+
+**Deductive Arguments:**
+\`\`\`
+Premise 1:  All humans are mortal.
+Premise 2:  Socrates is human.
+Conclusion: Therefore, Socrates is mortal.  ✓
+(Deductively valid: if premises true, conclusion MUST be true)
+\`\`\`
+
+**Inductive Arguments:**
+\`\`\`
+"The sun has risen every day for billions of years.
+ Therefore it will rise tomorrow."
+(Strong but not certain — new evidence could change this)
+\`\`\`
+
+**Common Logical Fallacies:**
+\`\`\`
+Ad Hominem       Attack the person, not their argument
+  "You can't trust his climate data — he's ugly."
+
+Straw Man        Misrepresent opponent's view
+  "You support gun control? You want no police either!"
+
+False Dichotomy  Present only 2 options when more exist
+  "You're either with us or against us."
+
+Slippery Slope   Assume chain of unlikely consequences
+  "If we allow X, civilization will collapse."
+
+Appeal to Nature Assume natural = good, artificial = bad
+  "Herbal remedies are better — they're natural!"
+
+Circular Reasoning Conclusion restates the premise
+  "The Bible is true because it says so in the Bible."
+
+Hasty Generalization Draw broad conclusion from few cases
+  "I met two rude Parisians; all French are rude."
+\`\`\``,
+
+  kant:`**Immanuel Kant (1724–1804)** — The Enlightenment's greatest philosopher
+
+**Life:**
+\`\`\`
+• Born and died in Königsberg, Prussia (never left!)
+• Professor of philosophy at University of Königsberg
+• Incredibly routine life — neighbours set clocks by his walks
+• "Critique of Pure Reason" (1781) — one of the most 
+  important philosophy books ever written
+\`\`\`
+
+**Theory of Knowledge (Epistemology):**
+\`\`\`
+• Rejected both pure empiricism and pure rationalism
+• The mind ACTIVELY shapes experience:
+  Space, time, and causality are mental frameworks,
+  not external realities
+• We can only know "phenomena" (appearances)
+• "Things-in-themselves" (noumena) are unknowable
+\`\`\`
+
+**Ethics — The Categorical Imperative:**
+\`\`\`
+Formulation 1 (Universal Law):
+"Act only according to principles you could will
+ to be universal laws of nature."
+→ Would lying be OK if EVERYONE always lied? No!
+   So lying is wrong.
+
+Formulation 2 (Humanity Formula):
+"Act so that you treat humanity, whether in your
+ own person or in another, always as an end, 
+ never merely as a means."
+→ People have inherent dignity; don't use them as tools.
+\`\`\``,
+
+ },
+ fallback:`I can explore these Philosophy topics:
+
+• **Ethics** — Utilitarianism, Deontology, Virtue Ethics
+• **Socrates** — method, trial, legacy
+• **Free will** — determinism vs agency
+• **Logic** — valid arguments, fallacies
+• **Kant** — categorical imperative, epistemology
+• **Great thinkers** — Plato, Aristotle, Hume, Nietzsche
+
+Ask: *"Explain ethics"* or *"Who was Socrates?"*`
+},
+
+}; // end KB
+
+// ──────────────────────────────────────────
+//  QUIZZES  (30 questions total, 5 per subject)
+// ──────────────────────────────────────────
+const QZ = {
+prog:[
+  {q:"What does a variable do in programming?",opts:["Deletes memory","Stores data that can change","Executes a loop","Defines a class"],a:1,e:"Variables are named containers for storing values that can be updated during execution."},
+  {q:"Which keyword defines a function in Python?",opts:["function","define","def","func"],a:2,e:"'def' is Python's keyword for defining functions: def my_function():"},
+  {q:"What is the output of: print(2 ** 3)?",opts:["6","5","8","9"],a:2,e:"** is the exponentiation operator. 2**3 = 2³ = 8."},
+  {q:"Which data structure stores key-value pairs?",opts:["List","Tuple","Set","Dictionary"],a:3,e:"Dictionaries store key-value pairs: {'name': 'Alice', 'age': 25}"},
+  {q:"What does OOP stand for?",opts:["Old Operational Programs","Object-Oriented Programming","Online Open Platform","Ordered Output Processing"],a:1,e:"OOP = Object-Oriented Programming — organizing code around objects and classes."},
+],
+math:[
+  {q:"What is the derivative of x³?",opts:["3x²","x²","3x","x³"],a:0,e:"Power rule: d/dx(xⁿ) = n·xⁿ⁻¹ → d/dx(x³) = 3x²"},
+  {q:"Pythagorean theorem states:",opts:["a+b=c","a²+b²=c²","a×b=c²","2a+b=c"],a:1,e:"In a right triangle: a² + b² = c² where c is the hypotenuse."},
+  {q:"π (pi) is approximately:",opts:["2.718","1.618","3.14159","2.302"],a:2,e:"π ≈ 3.14159... It's the ratio of circumference to diameter of any circle."},
+  {q:"Probability of rolling a 6 on a fair die:",opts:["1/2","1/4","1/6","1/3"],a:2,e:"A fair die has 6 equal outcomes. P(6) = 1/6 ≈ 16.7%"},
+  {q:"Area of a circle with radius 5:",opts:["25π","10π","5π","50π"],a:0,e:"Area = π·r² = π·5² = 25π ≈ 78.5"},
+],
+sci:[
+  {q:"Newton's 2nd Law of Motion:",opts:["F = mv","F = ma","E = mc²","v = d/t"],a:1,e:"F = ma: Force = mass × acceleration. Double force → double acceleration."},
+  {q:"The 'powerhouse of the cell' is:",opts:["Nucleus","Ribosome","Mitochondria","Golgi apparatus"],a:2,e:"Mitochondria produce ATP through cellular respiration — the cell's energy currency."},
+  {q:"In DNA, Adenine (A) pairs with:",opts:["Guanine","Cytosine","Thymine","Uracil"],a:2,e:"DNA base pairs: A↔T and G↔C. Remember: A-T, G-C (complementary bases)."},
+  {q:"Speed of light in a vacuum:",opts:["300,000 km/s","150,000 km/s","30,000 km/s","3,000,000 km/s"],a:0,e:"c ≈ 299,792 km/s (rounded to 300,000 km/s). Nothing travels faster."},
+  {q:"Photosynthesis produces:",opts:["CO₂ and water","Glucose and oxygen","Only ATP","Nitrogen compounds"],a:1,e:"6CO₂ + 6H₂O + light → C₆H₁₂O₆ (glucose) + 6O₂ (oxygen we breathe)."},
+],
+hist:[
+  {q:"World War II ended in:",opts:["1943","1944","1945","1946"],a:2,e:"WWII ended in 1945. Germany surrendered May 8 (V-E Day), Japan September 2 (V-J Day)."},
+  {q:"First Roman Emperor:",opts:["Julius Caesar","Augustus","Nero","Constantine"],a:1,e:"Augustus (Octavian) became Rome's first Emperor in 27 BCE after defeating Mark Antony."},
+  {q:"Berlin Wall fell in:",opts:["1987","1988","1989","1991"],a:2,e:"The Berlin Wall fell November 9, 1989 — the most visible symbol of the Cold War's end."},
+  {q:"The Renaissance began in:",opts:["England","France","Italy","Germany"],a:2,e:"The Renaissance began in Italian city-states (Florence, Venice, Rome) in the 14th century."},
+  {q:"Cuban Missile Crisis year:",opts:["1958","1960","1962","1964"],a:2,e:"October 1962 — 13 days when USA and USSR came closest to nuclear war over Soviet missiles in Cuba."},
+],
+lang:[
+  {q:"Which is a simile?",opts:["Life is a journey","Her voice was like velvet","The stars danced","Time is a thief"],a:1,e:"A simile uses 'like' or 'as' to compare. 'Like velvet' = simile. 'Life is a journey' = metaphor."},
+  {q:"'It's' is a contraction of:",opts:["its own","it is","it was","it has been"],a:1,e:"'It's' = 'it is' (contraction). 'Its' (no apostrophe) = possessive pronoun."},
+  {q:"The subject of: 'The cat slept.'",opts:["slept","The","cat","quietly"],a:2,e:"The subject performs the action. 'Cat' is doing the sleeping — it's the simple subject."},
+  {q:"A thesis statement belongs in the:",opts:["Conclusion","Second paragraph","Introduction","Title"],a:2,e:"The thesis — your main argument — goes at the end of the introduction paragraph."},
+  {q:"Which word is a conjunction?",opts:["Quickly","Beautiful","Although","Happiness"],a:2,e:"Conjunctions connect clauses. 'Although' is a subordinating conjunction (like because, since, while)."},
+],
+phil:[
+  {q:"Utilitarianism judges actions by:",opts:["Adherence to rules","Their consequences","Actor's character","Divine command"],a:1,e:"Utilitarianism (Bentham, Mill): right action produces the greatest happiness for the greatest number."},
+  {q:"'Cogito ergo sum' (I think, therefore I am) was said by:",opts:["Socrates","Plato","Descartes","Kant"],a:2,e:"René Descartes used this as his one certain truth — he couldn't doubt his own doubting mind."},
+  {q:"The Socratic Method mainly uses:",opts:["Lectures","Memorization","Questioning","Written texts"],a:2,e:"Socrates used relentless questioning to expose contradictions in people's beliefs (elenchus)."},
+  {q:"Kant's Categorical Imperative is based on:",opts:["Consequences","Universal moral duty","Virtue","Pleasure"],a:1,e:"Kant's deontological ethics: act only on principles you could will to be universal laws."},
+  {q:"'The unexamined life is not worth living' — who said it?",opts:["Aristotle","Plato","Socrates","Nietzsche"],a:2,e:"Socrates said this at his own trial (399 BCE), defending his life's work of philosophical questioning."},
+],
+};
+
+// ──────────────────────────────────────────
+//  AI RESPONSE ENGINE
+// ──────────────────────────────────────────
+function getReply(raw) {
+  const s = G.subj;
+  const kb = KB[s];
+  const t = raw.toLowerCase().trim();
+
+  // Greet / overview
+  if (/^(hi|hello|hey|start|begin|overview|what can|help|howdy)/.test(t))
+    return kb.welcome;
+
+  // Quiz
+  if (/\bquiz\b/.test(t))
+    return `Head to the **🎯 Quiz** tab above to test yourself on **${label(s)}**! 5 questions, instant answers, 100% offline.`;
+
+  // Notes
+  if (/\bnotes?\b/.test(t))
+    return `Use the **📝 Notes** tab to write and save your notes. Everything is stored in your browser — no internet required!`;
+
+  // Summary
+  if (/\bsummar/.test(t))
+    return `Here's an overview of **${label(s)}**:\n\n${kb.welcome}`;
+
+  // Next steps
+  if (/next|roadmap|path|what should|recommend|where to start/.test(t))
+    return `**Learning Roadmap for ${label(s)}:**\n\n${roadmap(s)}`;
+
+  // Topic match
+  const match = topicMatch(t, kb);
+  if (match) return match;
+
+  // Fallback
+  return kb.fallback;
+}
+
+function topicMatch(t, kb) {
+  // Exact key match
+  for (const k of Object.keys(kb.topics))
+    if (t.includes(k)) return kb.topics[k];
+  // Word-level partial match
+  const words = t.split(/\s+/);
+  for (const k of Object.keys(kb.topics)) {
+    const kw = k.split(/\s+/);
+    if (kw.some(w => words.some(uw => uw.length > 3 && (uw.includes(w) || w.includes(uw)))))
+      return kb.topics[k];
+  }
+  return null;
+}
+
+function label(id) { return SUBJECTS.find(s=>s.id===id)?.label || id; }
+
+function roadmap(id) {
+  const maps = {
+    prog:`🟢 **Beginner** — Variables, data types, if/else, loops\n🟡 **Intermediate** — Functions, OOP, file I/O\n🔵 **Advanced** — Algorithms, data structures, complexity\n🔴 **Expert** — System design, patterns, optimization\n\nAsk me: *variables*, *loops*, *functions*, *OOP*, *algorithms*`,
+    math:`🟢 **Beginner** — Arithmetic, fractions, percentages\n🟡 **Intermediate** — Algebra, geometry, basic probability\n🔵 **Advanced** — Calculus, statistics, linear algebra\n🔴 **Expert** — Number theory, abstract algebra, topology\n\nAsk me: *algebra*, *calculus*, *probability*, *statistics*`,
+    sci:`🟢 **Beginner** — Basic forces, atoms, cells\n🟡 **Intermediate** — Newton's laws, periodic table, DNA\n🔵 **Advanced** — Quantum physics, organic chemistry, evolution\n🔴 **Expert** — Relativity, biochemistry, ecology\n\nAsk me: *Newton*, *atom*, *cell*, *DNA*, *photosynthesis*`,
+    hist:`🟢 **Beginner** — Ancient Egypt, Greece, Rome\n🟡 **Intermediate** — Medieval period, Renaissance, Exploration\n🔵 **Advanced** — Industrial Revolution, World Wars\n🔴 **Expert** — Cold War, decolonization, globalization\n\nAsk me: *Rome*, *Renaissance*, *World War*, *Cold War*`,
+    lang:`🟢 **Beginner** — Basic grammar, parts of speech\n🟡 **Intermediate** — Essay structure, paragraph writing\n🔵 **Advanced** — Literary devices, rhetorical analysis\n🔴 **Expert** — Critical theory, discourse analysis\n\nAsk me: *grammar*, *essay*, *literary devices*, *punctuation*`,
+    phil:`🟢 **Beginner** — What is philosophy? Socrates, basic logic\n🟡 **Intermediate** — Ethics theories, epistemology\n🔵 **Advanced** — Kant, Nietzsche, existentialism\n🔴 **Expert** — Analytic/continental divide, philosophy of mind\n\nAsk me: *ethics*, *Socrates*, *free will*, *logic*, *Kant*`,
+  };
+  return maps[id] || "Ask me about specific topics to get started!";
+}
+
+// ──────────────────────────────────────────
+//  MARKDOWN RENDERER
+// ──────────────────────────────────────────
+function md(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/```([\s\S]+?)```/g, '<pre>$1</pre>')
+    .replace(/\n/g, '<br>');
+}
+
+// ──────────────────────────────────────────
+//  CHAT
+// ──────────────────────────────────────────
+let busy = false;
+
+function addMsg(role, html, actions=false) {
+  const box = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const ico = role==='ai'?'🧠':'👤';
+  let acts = '';
+  if (actions && role==='ai') acts = `
+    <div class="bbl-acts">
+      <button class="act-btn" onclick="toNotes(this)">📝 Save to Notes</button>
+      <button class="act-btn" onclick="deeper(this)">🔍 Go Deeper</button>
+      <button class="act-btn" onclick="simpler(this)">✨ Simplify</button>
+    </div>`;
+  d.innerHTML = `<div class="av ${role}">${ico}</div>
+    <div><div class="bbl">${html}</div><div class="bbl-time">${t}</div>${acts}</div>`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showDots() {
+  const box = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.id='dots'; d.className='msg ai';
+  d.innerHTML = `<div class="av ai">🧠</div>
+    <div><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function hideDots() { const d=document.getElementById('dots'); if(d) d.remove(); }
+
+async function sendMsg() {
+  const el = document.getElementById('inp');
+  const txt = el.value.trim();
+  if (!txt || busy) return;
+  el.value=''; el.style.height='auto';
+  await dispatch(txt, false);
+}
+
+async function dispatch(txt, silent) {
+  if (!silent) addMsg('user', md(txt));
+
+  G.chats++;
+  if (!G.studied.includes(G.subj)) G.studied.push(G.subj);
+
+  if (txt.length > 6) {
+    const tp = txt.substring(0,40)+(txt.length>40?'…':'');
+    G.topics = [tp,...G.topics.filter(t=>t!==tp)].slice(0,10);
+    renderTopics();
+  }
+
+  unlock('first');
+  if (G.chats>=10) unlock('10msg');
+  updateStats();
+  saveG();
+
+  showDots(); busy=true;
+  await sleep(500 + Math.random()*600);
+  hideDots(); busy=false;
+  addMsg('ai', md(getReply(txt)), true);
+}
+
+function qk(t) { document.getElementById('inp').value=t; sendMsg(); }
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function resize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+function toNotes(btn) {
+  document.getElementById('notepad').value = btn.closest('.msg').querySelector('.bbl').innerText;
+  document.querySelector('.tab-btn:nth-child(3)').click();
+}
+function deeper(btn) {
+  document.getElementById('inp').value = 'Tell me more about: ' + btn.closest('.msg').querySelector('.bbl').innerText.substring(0,50);
+  document.querySelector('.tab-btn:nth-child(1)').click();
+  sendMsg();
+}
+function simpler(btn) {
+  document.getElementById('inp').value = 'Explain more simply: ' + btn.closest('.msg').querySelector('.bbl').innerText.substring(0,50);
+  document.querySelector('.tab-btn:nth-child(1)').click();
+  sendMsg();
+}
+
+// ──────────────────────────────────────────
+//  SUBJECTS
+// ──────────────────────────────────────────
+function buildSubjects() {
+  const c = document.getElementById('subjList');
+  c.innerHTML = '';
+  SUBJECTS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'subj-btn' + (s.id===G.subj?' on':'');
+    b.innerHTML = `<span class="s-ico">${s.icon}</span>${s.label}`;
+    b.onclick = () => pickSubj(s.id, b);
+    c.appendChild(b);
+  });
+}
+
+function pickSubj(id, btn) {
+  document.querySelectorAll('.subj-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  G.subj = id;
+  if (!G.studied.includes(id)) G.studied.push(id);
+  if (G.studied.length>=3) unlock('3subj');
+  saveG();
+  dispatch(`Hi! Give me an overview of ${label(id)}.`, true);
+}
+
+// ──────────────────────────────────────────
+//  QUIZ
+// ──────────────────────────────────────────
+let quiz = {qs:[],i:0,sc:0};
+
+function startQuiz() {
+  quiz = {qs: QZ[G.subj]||QZ.prog, i:0, sc:0};
+  document.getElementById('scoreBox').style.display='none';
+  renderQ();
+}
+
+function renderQ() {
+  if (quiz.i >= quiz.qs.length) { endQuiz(); return; }
+  const q = quiz.qs[quiz.i];
+  document.getElementById('qMeta').textContent =
+    `${label(G.subj)} · Question ${quiz.i+1} of ${quiz.qs.length}`;
+  document.getElementById('qContent').innerHTML = `
+    <div class="card">
+      <div class="q-txt">${quiz.i+1}. ${q.q}</div>
+      <div class="opts">
+        ${q.opts.map((o,i)=>`<div class="opt" onclick="pick(${i})">${String.fromCharCode(65+i)}. ${o}</div>`).join('')}
+      </div>
+      <div class="exp" id="exp">💡 ${q.e}</div>
+      <button class="nxt-btn" id="nxt" onclick="nextQ()">Next →</button>
+    </div>`;
+}
+
+function pick(i) {
+  const q = quiz.qs[quiz.i];
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('lk'));
+  document.querySelectorAll('.opt')[q.a].classList.add('ok');
+  if (i!==q.a) document.querySelectorAll('.opt')[i].classList.add('no');
+  else quiz.sc++;
+  document.getElementById('exp').style.display='block';
+  document.getElementById('nxt').style.display='inline-block';
+}
+
+function nextQ() { quiz.i++; renderQ(); }
+
+function endQuiz() {
+  const {sc,qs} = quiz;
+  const pct = Math.round(sc/qs.length*100);
+  G.quizScores.push(pct);
+  G.quizDone++;
+  if (sc===qs.length) unlock('perf');
+  if (G.quizDone>=3) unlock('quiz3');
+  updateStats(); saveG();
+
+  document.getElementById('qContent').innerHTML='';
+  const sb = document.getElementById('scoreBox');
+  sb.style.display='block';
+  document.getElementById('scEm').textContent = pct>=80?'🎉':pct>=60?'👍':'💪';
+  document.getElementById('scNum').textContent = `${sc}/${qs.length} — ${pct}%`;
+  document.getElementById('scMsg').textContent =
+    pct>=80?'Excellent! You have strong understanding.':
+    pct>=60?'Good work! Review the missed questions.':
+    'Keep studying — you\'ll get it with practice!';
+}
+
+// ──────────────────────────────────────────
+//  NOTES
+// ──────────────────────────────────────────
+function saveNote() {
+  const v = document.getElementById('notepad').value.trim();
+  if (!v) return;
+  G.notes.unshift({text:v, date:new Date().toLocaleDateString(), subj:G.subj});
+  if (G.notes.length>25) G.notes.pop();
+  if (G.notes.length>=3) unlock('notes');
+  saveG(); renderNotes();
+  document.getElementById('notepad').value='';
+}
+function clearPad() { document.getElementById('notepad').value=''; }
+
+function renderNotes() {
+  const c = document.getElementById('noteList');
+  if (!G.notes.length) {
+    c.innerHTML='<div style="color:var(--mt);font-size:12px;font-family:monospace">No saved notes yet...</div>';
+    return;
+  }
+  c.innerHTML = G.notes.map((n,i)=>`
+    <div class="n-item" onclick="loadNote(${i})">
+      <div class="n-date">[${n.subj}] ${n.date}</div>
+      ${n.text.substring(0,100)}${n.text.length>100?'…':''}
+    </div>`).join('');
+}
+function loadNote(i) { document.getElementById('notepad').value=G.notes[i].text; }
+
+// ──────────────────────────────────────────
+//  PROGRESS
+// ──────────────────────────────────────────
+function renderProg() {
+  // Progress bars
+  const c = document.getElementById('pbars');
+  c.innerHTML = SUBJECTS.map(s => {
+    const done = G.studied.includes(s.id);
+    const base = done ? 10 : 0;
+    const chat = done ? Math.min(40, G.chats * 2) : 0;
+    const qBonus = G.quizScores.length ? G.quizScores[G.quizScores.length-1]*0.4 : 0;
+    const pct = Math.min(95, base + chat + (done?qBonus:0));
+    return `<div class="pb-wrap">
+      <div class="pb-lbl"><span>${s.icon} ${s.label}</span><span>${done?Math.round(pct)+'%':'0%'}</span></div>
+      <div class="pb"><div class="pf" style="width:${done?pct:0}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────
+//  STATS
+// ──────────────────────────────────────────
+function updateStats() {
+  document.getElementById('sChats').textContent = G.chats;
+  document.getElementById('sTopics').textContent = G.topics.length;
+  const avg = G.quizScores.length
+    ? Math.round(G.quizScores.reduce((a,b)=>a+b)/G.quizScores.length)+'%'
+    : '—';
+  document.getElementById('sAvg').textContent = avg;
+  document.getElementById('sStreak').textContent = '🔥'+Math.floor(G.chats/3);
+}
+
+function renderTopics() {
+  const c = document.getElementById('topicList');
+  if (!G.topics.length) {
+    c.innerHTML='<div class="t-item" style="opacity:.35">No topics yet...</div>';
+    return;
+  }
+  c.innerHTML = G.topics.map(t=>`<div class="t-item">${t}</div>`).join('');
+}
+
+// ──────────────────────────────────────────
+//  ACHIEVEMENTS
+// ──────────────────────────────────────────
+function unlock(id) {
+  if (!G.unlocked.includes(id)) {
+    G.unlocked.push(id);
+    const el = document.getElementById('a-'+id);
+    if (el) { el.classList.add('unlocked'); saveG(); }
+  }
+}
+function restoreAchs() {
+  (G.unlocked||[]).forEach(id=>{
+    const el=document.getElementById('a-'+id);
+    if(el) el.classList.add('unlocked');
+  });
+}
+
+// ──────────────────────────────────────────
+//  TABS
+// ──────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById(name+'P').classList.add('on');
+  if (name==='prog') renderProg();
+  if (name==='notes') renderNotes();
+}
+
+// ──────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────
+function init() {
+  buildSubjects();
+  updateStats();
+  renderTopics();
+  renderNotes();
+  restoreAchs();
+
+  setTimeout(()=>{
+    addMsg('ai', md(
+`👋 Hello! I'm **NOVA** — your **100% offline** AI learning companion.
+
+✅ **Zero internet required.** Everything runs inside this single HTML file.
+
+I have built-in knowledge on:
+💻 **Programming** · 📐 **Math** · 🔬 **Science** · 📜 **History** · ✍️ **Language** · 🤔 **Philosophy**
+
+**How to use me:**
+• Click a subject on the left sidebar
+• Ask me anything in the chat below
+• Use quick buttons for common actions
+• Take **🎯 Quizzes** to test yourself
+• Save notes in **📝 Notes** tab
+• Track learning in **📊 Progress** tab
+
+All your data stays in your browser — nothing is sent anywhere.
+
+What would you like to learn today?`
+    ), true);
+  }, 150);
+}
+
+init();
+</script>
+</body>
+</html>
